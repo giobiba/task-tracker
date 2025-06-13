@@ -10,3 +10,9 @@ members = [
     "task_utils",
     "utils"
 ]
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3

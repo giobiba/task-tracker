@@ -3,15 +3,52 @@ use chrono::{DateTime, Local};
 
 use anyhow::{Result};
 
-#[derive(Serialize, Deserialize, Debug)]
+use core::fmt::Display;
+
+use cli_table::{Table};
+
+use display_tasks::{display_task_list, display_status, display_date,};
+
+#[derive(Serialize, Deserialize, Debug, Table)]
 pub struct Task {
+    #[table(title = "ID")]
     pub id: i32,
-    pub status: Status,
+
+    #[table(title = "Description")]
     pub desc: String,
+
+    #[table(title = "Status", display_fn="display_status")]
+    pub status: Status,
+
+    #[table(title = "Created at", display_fn = "display_date")]
     #[serde(with = "my_date_format")]
     pub create_at: DateTime<Local>,
+
+    #[table(title = "Last Update", display_fn = "display_date")]
     #[serde(with = "my_date_format")]
     pub update_at: DateTime<Local>,
+}
+
+mod display_tasks{
+    use super::*;
+    use cli_table::{WithTitle};
+
+    pub fn display_status(status: &Status) -> impl Display {
+        match status {
+            Status::Todo => "To do",
+            Status::Progress => "In Progress",
+            Status::Done => "Done",
+        }
+    }
+
+    pub fn display_date(date: &DateTime<Local>) -> impl Display {
+        date.format("%Y-%m-%d %H:%M:%S")
+    }
+
+    pub fn display_task_list(task_list: Vec<&Task>) -> impl Display
+    {
+        task_list.with_title().display().unwrap()
+    }
 }
 
 impl PartialEq for Task {
@@ -32,7 +69,7 @@ pub enum Status {
     Done
 }
 
-pub type OpResult =  Result<()>;
+pub type OpResult = Result<()>;
 
 impl TaskList {
     #![allow(dead_code)]
@@ -74,9 +111,11 @@ impl TaskList {
             update_at: now,
         };
 
-        println!("Added task:\n {:#?}", task);
+        println!("Task Added:");
+        println!("{}", display_task_list(vec![&task]));
 
         self.list.push(task);
+
 
         Ok(())
     }
@@ -91,7 +130,7 @@ impl TaskList {
         task.desc = desc;
         task.update_at = Local::now();
 
-        println!("Updated description for task:\n {:#?}", task.desc);
+        println!("Description updated to: {}", task.desc);
 
         Ok(())
     }
@@ -104,7 +143,7 @@ impl TaskList {
 
         let removed_task= self.list.remove(index);
 
-        println!("Removed task:\n {:#?}", removed_task);
+        println!("Removed task: {}", removed_task.desc);
 
         Ok(())
     }
@@ -114,9 +153,15 @@ impl TaskList {
             .iter()
             .filter(|t| status.contains(&t.status))
             .collect();
-
-        println!("Task list:\n {:#?}", filtered_tasks);
         
+        if filtered_tasks.len() > 0 {
+            println!("{}", display_task_list(filtered_tasks));
+        }
+        else {
+            println!("No tasks with that status");
+        }
+
+
         Ok(())
     }
 
@@ -130,7 +175,7 @@ impl TaskList {
         task.status = status;
         task.update_at = Local::now();
 
-        println!("Task updated to:\n {:#?}", task.status);
+        println!("Moved task {} to {}", task.desc, display_status(&task.status));
 
         Ok(())
     }
