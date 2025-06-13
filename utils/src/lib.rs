@@ -26,7 +26,7 @@ pub fn parse_command(args: &[String]) -> Result<CommandType> {
         }),
         "mark" => Ok(CommandType::Mark {
             id: args[2].parse::<i32>()?,
-            status: parse_status(&args[2], false)?,
+            status: parse_status(&args[3], false)?,
         }),
         unknown_command => Err(anyhow!("Got incorrect command: {unknown_command}"))
     }
@@ -43,13 +43,15 @@ pub fn parse_status(status: &str, allow_all: bool) -> Result<CommandStatus>{
             }
         },
         Ok(any) => Ok(any),
-        Err(_) => Err(anyhow!("Failed to parse status {status}")),
+        Err(_) => Err(anyhow!("Failed to parse status: {status}")),
     }   
 }
 
 #[cfg(test)]
 mod command_tests {
     use super::*;
+
+    use anyhow::{Result};
 
     #[test]
     fn parse_add() -> Result<()> {
