@@ -1,0 +1,12 @@
+[workspace]
+
+name = "task-tracker"
+version = "0.1.0"
+edition = "2024"
+resolver = "1"
+
+members = [
+    "app",
+    "task_utils",
+    "utils"
+]

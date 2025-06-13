@@ -1,0 +1,9 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+task_utils = { path = "../task_utils" }
+utils = { path = "../utils" }
+anyhow = "1"
