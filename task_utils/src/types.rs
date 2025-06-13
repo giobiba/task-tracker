@@ -35,6 +35,7 @@ pub enum Status {
 pub type OpResult =  Result<()>;
 
 impl TaskList {
+    #![allow(dead_code)]
     fn new() -> Self {
         Self { list: vec![] }
     }
